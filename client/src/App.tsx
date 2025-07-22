@@ -102,6 +102,28 @@ function App() {
     return () => clearInterval(interval);
   }, [currentCanvas, loadCursors]);
 
+  // Periodically update shapes for real-time collaboration
+  useEffect(() => {
+    if (!currentCanvas) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const latestShapes = await trpc.getShapes.query({ canvasId: currentCanvas.id });
+        setCurrentCanvas(prev => {
+          if (!prev) return null;
+          if (JSON.stringify(prev.shapes) !== JSON.stringify(latestShapes)) {
+            return { ...prev, shapes: latestShapes };
+          }
+          return prev;
+        });
+      } catch (error) {
+        console.error('Failed to poll shapes:', error);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [currentCanvas]);
+
   // Create new canvas
   const handleCreateCanvas = async (e: React.FormEvent) => {
     e.preventDefault();
