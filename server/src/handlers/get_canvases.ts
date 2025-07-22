@@ -1,8 +1,17 @@
 
+import { db } from '../db';
+import { canvasesTable } from '../db/schema';
 import { type Canvas } from '../schema';
 
 export const getCanvases = async (): Promise<Canvas[]> => {
-  // This is a placeholder declaration! Real code should be implemented here.
-  // The goal of this handler is fetching all canvases from the database.
-  return [];
+  try {
+    const results = await db.select()
+      .from(canvasesTable)
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch canvases:', error);
+    throw error;
+  }
 };

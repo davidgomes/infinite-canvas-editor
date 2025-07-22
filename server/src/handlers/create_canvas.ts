@@ -1,14 +1,29 @@
 
+import { db } from '../db';
+import { canvasesTable } from '../db/schema';
 import { type CreateCanvasInput, type Canvas } from '../schema';
 
 export const createCanvas = async (input: CreateCanvasInput): Promise<Canvas> => {
-  // This is a placeholder declaration! Real code should be implemented here.
-  // The goal of this handler is creating a new canvas and persisting it in the database.
-  return Promise.resolve({
-    id: 0, // Placeholder ID
-    name: input.name,
-    description: input.description || null,
-    created_at: new Date(),
-    updated_at: new Date()
-  } as Canvas);
+  try {
+    // Insert canvas record
+    const result = await db.insert(canvasesTable)
+      .values({
+        name: input.name,
+        description: input.description || null
+      })
+      .returning()
+      .execute();
+
+    const canvas = result[0];
+    return {
+      id: canvas.id,
+      name: canvas.name,
+      description: canvas.description,
+      created_at: canvas.created_at,
+      updated_at: canvas.updated_at
+    };
+  } catch (error) {
+    console.error('Canvas creation failed:', error);
+    throw error;
+  }
 };
